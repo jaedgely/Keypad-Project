@@ -21,9 +21,9 @@ const byte numClms = 4;                                   //Only reason to chang
 unsigned long alarmTimer = 0;                             //Needed for an if-loop case, don't touch, otherwise alarm LED will never go off
 
 char keymap[numRows][numClms] = {{'1', '2', '3', 'A'},    //Initializes the keymap with the same layout as the physical keypad
-                                 {'4', '5', '6', 'B'},
-								                 {'7', '8', '9', 'C'},
-								                 {'*', '0', '#', 'D'}};
+                                {'4', '5', '6', 'B'},
+				{'7', '8', '9', 'C'},
+				{'*', '0', '#', 'D'}};
 
 byte rowPins[numRows] = {7, 6, 5, 4 };                    //Connect keypad ROW0, ROW1, ROW2 and ROW3 to these Arduino pins in this order
 byte clmPins[numClms] = {3, A3, A4, A5 };                 //Connect keypad COL0, COL1, COL2 and COL3 to these Arduino pins in this order
