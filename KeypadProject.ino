@@ -10,7 +10,7 @@ const byte doorOpen = A0;                                 //Pin which the door s
 const byte doorAlarm = A1;                                //Pin which the alarm LED is connected
 const byte systemLED = A2;                                //Pin which the system active LED is connected
 char passwordLength = 5;                                  //Password length variable - must be equal to length of password class. E.g. Password("1234") --> passwordLength
-unsigned long alarmGracePeriod = 5000;                    //How long between alarm being tripped and alarm going off
+unsigned long alarmGracePeriod = 30000;                   //How long between alarm being tripped and alarm going off
 
 //These are variables you shouldn't change
 char alarmTripped = 0;                                    //Since system is disabled, alarmTripped should be disabled.
@@ -21,9 +21,9 @@ const byte numClms = 4;                                   //Only reason to chang
 unsigned long alarmTimer = 0;                             //Needed for an if-loop case, don't touch, otherwise alarm LED will never go off
 
 char keymap[numRows][numClms] = {{'1', '2', '3', 'A'},    //Initializes the keymap with the same layout as the physical keypad
-                                {'4', '5', '6', 'B'},
-				{'7', '8', '9', 'C'},
-				{'*', '0', '#', 'D'}};
+                                 {'4', '5', '6', 'B'},
+								                 {'7', '8', '9', 'C'},
+								                 {'*', '0', '#', 'D'}};
 
 byte rowPins[numRows] = {7, 6, 5, 4 };                    //Connect keypad ROW0, ROW1, ROW2 and ROW3 to these Arduino pins in this order
 byte clmPins[numClms] = {3, A3, A4, A5 };                 //Connect keypad COL0, COL1, COL2 and COL3 to these Arduino pins in this order
@@ -77,8 +77,9 @@ void loop(){
 }
 void checkPassword(){                                     
   if (password.evaluate()){                               //If password is correct...
-    if (systemEnable == 0){                               //AND if system is NOT ENABLED
-      if (digitalRead(doorOpen) == LOW){                  //AND if door is CLOSED --> Arm system (doorOpen == 1 means door is open)
+    switch (systemEnable){
+      case 0:                                             //AND if system is NOT ENABLED
+        if (digitalRead(doorOpen) == LOW){                //AND if door is CLOSED --> Arm system (doorOpen == 1 means door is open)
         password.reset();                                 
         lcd.clear();                                  
         lcd.setCursor(0,0);                           
@@ -91,8 +92,8 @@ void checkPassword(){
         inputLength = 0;                                  //Set inputLength back to 0, otherwise the password auto-evaluate only works once
         systemEnable = 1;                                 //Turn on the alarm system
         return(0);
-      }
-      if (digitalRead(doorOpen) == HIGH){                 //OR if door is OPEN
+        }
+        else{
         password.reset();                                 //Door has to be closed for the alarm to be set... stops auto-triggering the alarm
         lcd.clear();
         lcd.setCursor(0,0);
@@ -102,25 +103,23 @@ void checkPassword(){
         lcd.print("Enter Passcode:");
         lcd.setCursor(0,1);
         inputLength = 0;
-        systemEnable = 0;                                 //Maybe delete this? If the system is on this if loop shouldn't fire
         return(0);
-      }
-    } 
-    if (systemEnable == 1){                               //OR if the system is ENABLED
-      password.reset();                                  
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print("SYSTEM DISARMED");
-      digitalWrite(doorAlarm, LOW);
-      digitalWrite(systemLED, LOW);
-      delay(3000);
-      lcd.setCursor(0,0);
-      lcd.print("Enter Passcode:");
-      lcd.setCursor(0,1);
-      inputLength = 0;
-      systemEnable = 0;
-      alarmTripped = 0;                                   //Set the alarm as not tripped. Needed for the delay between doorOpen = 1 and doorAlarm becoming HIGH
-      return(0);
+        } 
+      case 1:                                             //OR if the system is ENABLED
+        password.reset();                                  
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("SYSTEM DISARMED");
+        digitalWrite(doorAlarm, LOW);
+        digitalWrite(systemLED, LOW);
+        delay(3000);
+        lcd.setCursor(0,0);
+        lcd.print("Enter Passcode:");
+        lcd.setCursor(0,1);
+        inputLength = 0;
+        systemEnable = 0;
+        alarmTripped = 0;                                   //Set the alarm as not tripped. Needed for the delay between doorOpen = 1 and doorAlarm becoming HIGH
+        return(0);
       }
     }
   else{                                                   //If password is incorrect
